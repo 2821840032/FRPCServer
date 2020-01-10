@@ -3,3 +3,12 @@
 ################################################################################
 
 /.vs/FRPCServer/v16
+/FRPCServer/bin/Debug/netstandard2.0
+/FRPCServer/obj
+/FRPCServerAOPContainer/bin/Debug/netstandard2.0
+/FRPCServerAOPContainer/obj
+/FRPCServerCommandConsole/bin/Debug/netstandard2.0
+/FRPCServerCommandConsole/obj
+/MessageServer/bin/Debug
+/MessageServer/obj/Debug
+/packages

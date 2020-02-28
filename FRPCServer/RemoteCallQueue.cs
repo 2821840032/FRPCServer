@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using System.Timers;
 using System.Threading;
 using FRPCServer.Entity;
 using FRPCServer.CommunicationEntity;
@@ -28,9 +27,9 @@ namespace FRPCServer
         public int MaxRetryCount { get; private set; }
 
 
-        private System.Timers.Timer HealthExaminationThread;
+        private Timer HealthExaminationThread;
 
-        private System.Timers.Timer ScheduledCleaningThread;
+        private Timer ScheduledCleaningThread;
 
         /// <summary>
         /// 执行事件中的方法
@@ -47,25 +46,16 @@ namespace FRPCServer
             this.second = second;
             MethodCallQueues = new ConcurrentDictionary<Guid, RemoteCallEntrity>();
 
-            MaxRetryCount = maxRetryCount;
-            Thread thread = new Thread(TimerInit);
-            thread.Start();
-
+            TimerInit();
         }
 
         private void TimerInit() {
-            
-            HealthExaminationThread = new System.Timers.Timer();
-            HealthExaminationThread.Enabled = true;
-            HealthExaminationThread.Interval = 1000* 5; //执行间隔时间,单位为毫秒; 这里实际间隔为  second
-            HealthExaminationThread.Elapsed += new System.Timers.ElapsedEventHandler(healthExaminationFunc);
-            HealthExaminationThread.Start();
 
-            ScheduledCleaningThread = new System.Timers.Timer();
-            ScheduledCleaningThread.Enabled = true;
-            ScheduledCleaningThread.Interval = 60000; //执行间隔时间,单位为毫秒; 这里实际间隔为1分钟  
-            ScheduledCleaningThread.Elapsed += new System.Timers.ElapsedEventHandler(ScheduledCleaningFunc);
-            ScheduledCleaningThread.Start();
+            //执行间隔时间,单位为毫秒; 这里实际间隔为  second
+            HealthExaminationThread = new Timer(healthExaminationFunc,null, 1000 * 5, 1000 * 5);
+
+            //执行间隔时间,单位为毫秒; 这里实际间隔为1分钟  
+            ScheduledCleaningThread = new Timer(ScheduledCleaningFunc,null, 60000, 60000);
         }
 
         /// <summary>
@@ -81,7 +71,7 @@ namespace FRPCServer
         /// <summary>
         /// 监控检查函数
         /// </summary>
-        private void healthExaminationFunc(object source, ElapsedEventArgs e)
+        private void healthExaminationFunc(object source)
         {
             foreach (var item in MethodCallQueues.Where(d => DateTime.Now>d.Value.ExpirationTime&& d.Value.State== ReceiveMessageState.Wait).ToList())
             {
@@ -102,7 +92,7 @@ namespace FRPCServer
         /// <summary>
         /// 定时清理函数
         /// </summary>
-        private void ScheduledCleaningFunc(object source, ElapsedEventArgs e)
+        private void ScheduledCleaningFunc(object source)
         {
             foreach (var item in MethodCallQueues.Where(d => DateTime.Now> d.Value.ExpirationTime.AddHours(60)).ToList())
             {
@@ -115,7 +105,7 @@ namespace FRPCServer
         /// 进行远程调用
         /// </summary>
         /// <param name="info">通讯的信息</param>
-        public async Task RemoteExecutionFuncAsync(RemoteCallEntrity info)
+        public async void RemoteExecutionFuncAsync(RemoteCallEntrity info)
         {
             await Task.Yield();
             RemoteExecutionFunc(info);

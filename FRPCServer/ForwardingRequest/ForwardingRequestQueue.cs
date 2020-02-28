@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Timers;
 using Newtonsoft.Json;
 using FRPCServer.CommunicationEntity;
 using System.Linq;
@@ -18,7 +17,7 @@ namespace FRPCServer.ForwardingRequest
     public class ForwardingRequestQueue
     {
 
-        private System.Timers.Timer ScheduledCleaningThread;
+        private Timer ScheduledCleaningThread;
 
         /// <summary>
         /// 执行事件中的方法
@@ -32,19 +31,7 @@ namespace FRPCServer.ForwardingRequest
         {
             MethodCallQueues = new ConcurrentDictionary<Guid, ForwardingRequestEntity>();
 
-            Thread thread = new Thread(TimerInit);
-            thread.Start();
-
-        }
-
-        private void TimerInit()
-        {
-
-            ScheduledCleaningThread = new System.Timers.Timer();
-            ScheduledCleaningThread.Enabled = true;
-            ScheduledCleaningThread.Interval = 60000; //执行间隔时间,单位为毫秒; 这里实际间隔为1分钟  
-            ScheduledCleaningThread.Elapsed += new System.Timers.ElapsedEventHandler(ScheduledCleaningFunc);
-            ScheduledCleaningThread.Start();
+            ScheduledCleaningThread = new Timer(ScheduledCleaningFunc,null, 60000,60000);
         }
 
         /// <summary>
@@ -70,7 +57,7 @@ namespace FRPCServer.ForwardingRequest
         /// <summary>
         /// 定时清理函数
         /// </summary>
-        private void ScheduledCleaningFunc(object source, ElapsedEventArgs e)
+        private void ScheduledCleaningFunc(object source)
         {
             foreach (var item in MethodCallQueues.Where(d => DateTime.Now > d.Value.ExpirationTime.AddHours(60)).ToList())
             {

@@ -55,7 +55,6 @@ namespace FRPCServer
         /// </summary>
         public IUnityContainer unityContainer { get; set; }
 
-
         /// <summary>
         /// 初始化容器对象
         /// </summary>

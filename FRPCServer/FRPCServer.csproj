@@ -9,7 +9,7 @@
     <None Remove="Config\log4net.unix.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="log4net" Version="2.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="SuperSocket" Version="1.6.6.1" />
     <PackageReference Include="SuperSocket.Engine" Version="1.6.6.1" />
